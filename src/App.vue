@@ -53,6 +53,7 @@
             <span>Import CSV:</span>
             <input type="file" class="form-file mt-3 block w-full rounded-md border shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" @change="onFileUpload">
           </label>
+          <div v-if="csvFileName" class="mt-3">File name: {{ csvFileName }}</div>
         </div>
         <input type="button" class="mt-3 px-3 py-2 font-semibold rounded-md text-black bg-teal-600 hover:bg-teal-500 cursor-pointer transition" value="Generate" @click="GenerateAnimation()">
       </div>
@@ -118,6 +119,7 @@ const formData = ref({
 const previewElement = ref(null);
 const csvRowData = ref([]);
 const csvRowDataKeys = ref([]);
+const csvFileName = ref('');
 
 watchEffect(() => {
   GenerateAnimation();
@@ -242,6 +244,8 @@ function toAnimate(element, item) {
 function onFileUpload(e) {
   if (e.target.files[0]) {
     const file = e.target.files[0];
+    csvFileName.value = file.name;
+    e.target.value = null;
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = function (e) {
@@ -255,6 +259,7 @@ function onFileUpload(e) {
     }
   } else {
     setCsvRowData([]);
+    csvFileName.value = '';
   }
 }
 async function readStaticCSV() {
