@@ -281,7 +281,7 @@ function setCsvRowData(csvData) {
 
 function GenerateAnimation() {
   if (formData.value.isImportFromCsv) {
-    readStaticCSV();
+    // readStaticCSV();
     makeAnimation(csvRowData.value);
   } else {
     const { input, animation, output, animation_duration, animation_pause } = formData.value;
