@@ -108,7 +108,7 @@ const ANIMATION = {
 
 const formData = ref({
   isImportFromCsv: false,
-  input: 'We can think of %2% x %5% as %2% group of %5% 😀',
+  input: 'A dark pattern can %trick% someone into buying something.  %💰💰%  Does this cause %harm 🔥%?',
   animation: animations[0],
   output: outputs[0],
   animation_duration: ANIMATION.DURATION,
@@ -167,6 +167,7 @@ async function animateToQueue(items) {
           const element = elements[index];
           if (rowIndex === 0 && index === 0) {
             toAnimate(element, item);
+            console.log(item);
           } else {
             await makePromise(() => {
               toAnimate(element, item);
@@ -191,22 +192,22 @@ async function makePromise(callback, timeout) {
 
 function getResults(item, rowIndex) {
   const { colors } = item;
-  let number_1 = 1;
-  let number_2 = 1;
+  let number_1 = null;
+  let number_2 = null;
   let type = '';
   let number_1_style = `color: ${colors[0] ? colors[0] : 'inherit'}; animation-duration: ${item.animation_duration}ms;`;
   let number_2_style = `color: ${colors[1] ? colors[1] : 'inherit'}; animation-duration: ${item.animation_duration}ms;`;
 
   const regex_number = /(%\d+%)[\sx*]+(%\d+%)/gm;
-  const regex_type = /\d+\s*%\s+([\w]+)$|\d+\s*%\s+([\W]+)$/gm;
+  const regex_type = /\d+\s*%\s+([\w]+)[\.\s]+$|\d+\s*%\s+([\W]+)[\.\s]+$/gm;
 
-  let str = item.input.trim().replace(/\.[^.]*$/gm, '');
+  let str = item.input.trim();//.replace(/\.[^.]*$/gm, '');
   let m;
   while ((m = regex_type.exec(str)) !== null) {
     if (m.index === regex_number.lastIndex) regex_number.lastIndex++;
     if (m[2]) type = m[2];
   }
-  str = str + '.';
+
   while ((m = regex_number.exec(str)) !== null) {
     if (m.index === regex_number.lastIndex) regex_number.lastIndex++;
     if (m[1]) {
@@ -216,6 +217,13 @@ function getResults(item, rowIndex) {
     if (m[2]) {
       number_2 = parseInt(m[2].replaceAll("%", ""));
       str = str.replaceAll(m[2], `<span class="hidden" style="${number_2_style}">${number_2}</span>`);
+    }
+  }
+  if (!number_1 || !number_2) {
+    const regex_within_percentage = /\%(.*?)\%/gm;
+    while ((m = regex_within_percentage.exec(str)) !== null) {
+      if (m.index === regex_within_percentage.lastIndex) regex_within_percentage.lastIndex++;
+      str = str.replaceAll(m[0], `<span class="hidden" style="${number_2_style}">${m[1]}</span>`);
     }
   }
 
@@ -229,7 +237,7 @@ function getResults(item, rowIndex) {
     });
   }
 
-  return `<div class="row-${rowIndex}">${str}</div>`;
+  return `<div class="row-${rowIndex}"><div class="hidden">${str}</div></div>`;
 }
 
 
@@ -286,7 +294,6 @@ function setCsvRowData(csvData) {
 
 function GenerateAnimation() {
   if (formData.value.isImportFromCsv) {
-    // readStaticCSV();
     makeAnimation(csvRowData.value);
   } else {
     const { input, animation, output, animation_duration, animation_pause } = formData.value;
